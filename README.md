@@ -1,3 +1,6 @@
+[![Stories in Backlog](https://badge.waffle.io/akrueger/investmentCounterFactual.svg?label=backlog&title=Backlog)](http://waffle.io/akrueger/investmentCounterFactual)
+[![Stories in Ready](https://badge.waffle.io/akrueger/investmentCounterFactual.svg?label=ready&title=Ready)](http://waffle.io/akrueger/investmentCounterFactual)
+[![Stories in In Progress](https://badge.waffle.io/akrueger/investmentCounterFactual.svg?label=In%20Progress&title=In%20Progress)](http://waffle.io/akrueger/investmentCounterFactual)
 [![Stories in Done](https://badge.waffle.io/akrueger/investmentCounterFactual.svg?label=done&title=Done)](http://waffle.io/akrueger/investmentCounterFactual)
 
 # Investment Counter Factual
