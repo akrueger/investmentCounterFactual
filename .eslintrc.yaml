@@ -1,0 +1,81 @@
+extends: 
+  - airbnb
+  - plugin:react/recommended
+plugins:
+  - react
+ecmaFeatures:
+  jsx: true
+  experimentalObjectRestSpread: true
+env:
+  browser: true
+  node: true
+  es6: true
+settings:
+  import/resolver: webpack
+rules:
+  max-len:
+    - error
+    - code: 120
+  no-tabs: off
+  indent:
+    - error
+    - tab
+    - SwitchCase: 1
+  quotes:
+    - error
+    - single
+  quote-props:
+    - error
+    - as-needed
+    - keywords: false
+      unnecessary: true
+      numbers: false
+  semi:
+    - error
+    - never
+  brace-style:
+    - error
+    - stroustrup
+  object-curly-spacing: off
+  no-confusing-arrow:
+    - error
+  arrow-parens:
+    - error
+    - as-needed
+  space-before-function-paren:
+    - error
+    - never  
+  no-param-reassign:
+    - error
+    - props: false
+  comma-dangle: off
+  import/no-extraneous-dependencies:
+    - error
+    - devDependencies: true
+      optionalDependencies: false
+      peerDependencies: false
+  keyword-spacing:
+    - error
+    - overrides:
+        switch:
+          after: false
+        function:
+          after: false
+        while:
+          after: false
+        for:
+          after: false
+        if:
+          after: false
+  jsx-quotes: 
+    - error
+    - prefer-single
+  react/prefer-es6-class: off
+  react/require-extension: off
+  react/jsx-space-before-closing: off
+  react/jsx-indent:
+    - 2
+    - tab
+  react/jsx-indent-props:
+    - 2
+    - tab
