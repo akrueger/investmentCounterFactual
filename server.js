@@ -20,17 +20,3 @@
 // 'd' (daily), 'w' (weekly), 'm' (monthly), 'v' (dividends only)
 
 // const YAHOO_URI = 'http://finance.yahoo.com/d/quotes.csv'
-
-// function calculateWorth(state) {
-// 	console.log(state)
-// 	fetchCurrentPrice(YAHOO_URI, {
-// 		symbols: ['VAW'],
-// 		fields: 'sl1'
-// 	})
-// 	return _.map(state, element =>
-// 		element.shares * element.price
-// 	)
-// 	.reduce((previous, current) =>
-// 		previous + current
-// 	)
-// }

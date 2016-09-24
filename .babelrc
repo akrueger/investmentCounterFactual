@@ -3,6 +3,7 @@
 		"es2015"
 	],
 	"plugins": [
-		"lodash"
+		"espower",
+		"transform-runtime"
 	]
 }

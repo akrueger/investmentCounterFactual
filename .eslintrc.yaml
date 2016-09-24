@@ -13,6 +13,7 @@ env:
 settings:
   import/resolver: webpack
 rules:
+  no-unused-vars: off
   max-len:
     - error
     - code: 120
@@ -37,6 +38,9 @@ rules:
     - error
     - stroustrup
   object-curly-spacing: off
+  no-use-before-define:
+    - error
+    - functions: false
   no-confusing-arrow:
     - error
   arrow-parens:

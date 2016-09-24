@@ -17,7 +17,14 @@ module.exports = {
 	plugins: [
 		new HtmlWebpackPlugin({
 			title: 'Investment Counter Factual',
-			template: 'index.ejs'
+			template: 'index.ejs',
+			minify: {
+				quoteCharacter: '\'',
+				html5: true,
+				removeScriptTypeAttributes: true,
+				removeStyleLinkTypeAttributes: true,
+				useShortDoctype: true
+			}
 		}),
 		new webpack.optimize.OccurrenceOrderPlugin(),
 		new webpack.optimize.UglifyJsPlugin()
@@ -48,9 +55,5 @@ module.exports = {
 			jeet(),
 			poststylus(['autoprefixer'])
 		]
-	},
-	node: {
-		fs: 'empty',
-		child_process: 'empty'
 	}
 }

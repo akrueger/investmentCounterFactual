@@ -1,96 +1,71 @@
-import { createStore, compose, applyMiddleware } from 'redux'
-import createLogger from 'redux-logger'
 import _map from 'lodash.map'
-// const moment = require('moment')
-// import Converter = require('csvtojson').Converter
-import seedData from '../assets/seedData.json'
+import moment from 'moment'
+import Papa from 'papaparse'
+import store from './store.js'
+import { buyStock, sellStock } from './actionCreators.js'
 
-const BUY = 'BUY'
-const SELL = 'SELL'
+const fileInput = document.getElementById('fileInput')
+fileInput.addEventListener('change', handleFiles, false)
 
-function buyStock(payload) {
-	return {
-		type: BUY,
-		payload
+const worthButton = document.getElementById('worthButton')
+worthButton.addEventListener('click', calculateWorth, false)
+
+function handleFiles() {
+	const file = this.files[0]
+	const reader = new FileReader()
+	reader.onload = () => {
+		const json = Papa.parse(reader.result, {header: true})
+		processData(json)
 	}
+	reader.onerror = () => {
+		throw new Error('Error reading CSV file')
+	}
+	reader.readAsText(file)
 }
 
-function sellStock(payload) {
-	return {
-		type: SELL,
-		payload
-	}
+// Papa.parse(seed, {
+//  complete: results => {
+//    console.log('Finished: ', results.data)
+//  }
+// })
+
+function processData(data) {
+	const sortedData = sortByDate(data)
+	dispatchActions(sortedData)
 }
 
-function calculateWorth(state) {
-	return _map(state, element =>
+function sortByDate(transactions) {
+	return transactions.data.sort((a, b) =>
+		moment(a.DATE).diff(b.DATE)
+	)
+}
+
+function dispatchActions(sortedData) {
+	sortedData.forEach(element => {
+		if(element.TRANSACTION.toUpperCase() === 'BUY') {
+			store.dispatch(buyStock({
+				[element.SYMBOL]: {
+					price: parseFloat(element.PRICE),
+					shares: parseInt(element.SHARES, 10)
+				}
+			}))
+		}
+		else if(element.TRANSACTION.toUpperCase() === 'SELL') {
+			store.dispatch(sellStock({
+				[element.SYMBOL]: {
+					price: element.PRICE,
+					shares: element.SHARES
+				}
+			}))
+		}
+	})
+}
+
+function calculateWorth() {
+	_map(store.getState(), element =>
 		element.shares * element.price
 	)
 	.reduce((previous, current) =>
 		previous + current
 	)
 }
-
-function portfolioReducer(state = {}, action) {
-	if(action.payload) {
-		const symbol = Object.keys(action.payload)[0]
-		switch(action.type) {
-			case BUY:
-				if(Object.keys(state).includes(symbol)) {
-					return Object.assign({}, state, {
-						[symbol]: {
-							shares: state[symbol].shares + action.payload[symbol].shares,
-							price: action.payload[symbol].price
-						}
-					})
-				}
-				return Object.assign({}, state, action.payload)
-			case SELL:
-				return state
-			default:
-				return state
-		}
-	}
-	return state
-}
-
-const logger = createLogger()
-const store = createStore(portfolioReducer, compose(
-	applyMiddleware(logger),
-	window.devToolsExtension ? window.devToolsExtension() : f => f
-))
-
-// const portfolio = {}
-
-// const readCSV = () => {
-// 	const converter = new Converter({})
-// 	converter.fromFile('./seedData.csv', (error, result) => {
-// 		result.forEach(element => {
-// 			portfolio[element.SYMBOL] = {
-// 				SHARES: 0
-// 			}
-// 		})
-// 		_.map(portfolio, (objElement, key) =>
-// 			result.forEach(arrayElement => {
-// 				if(key === arrayElement.SYMBOL) {
-// 					objElement.SHARES += arrayElement.SHARES
-// 				}
-// 			})
-// 		)
-// 	})
-// }
-
-// readCSV()
-
-seedData.forEach(element => {
-	if(element.TRANSACTION === 'BUY') {
-		store.dispatch(buyStock({
-			[element.SYMBOL]: {
-				price: element.PRICE,
-				shares: element.SHARES
-			}
-		}))
-	}
-})
-
-calculateWorth(store.getState())
