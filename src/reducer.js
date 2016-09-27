@@ -14,7 +14,15 @@ function portfolioReducer(state = {}, action) {
 				}
 				return Object.assign({}, state, action.payload)
 			case 'SELL':
-				return state
+				if(Object.keys(state).includes(symbol)) {
+					return Object.assign({}, state, {
+						[symbol]: {
+							shares: state[symbol].shares - action.payload[symbol].shares,
+							price: action.payload[symbol].price
+						}
+					})
+				}
+				return Object.assign({}, state, action.payload)
 			default:
 				return state
 		}

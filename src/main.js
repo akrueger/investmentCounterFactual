@@ -4,17 +4,60 @@ import Papa from 'papaparse'
 import store from './store.js'
 import { buyStock, sellStock } from './actionCreators.js'
 
-const fileInput = document.getElementById('fileInput')
-fileInput.addEventListener('change', handleFiles, false)
+const uri = '/api'
+const date = '2014-12-02'
+const symbols = 'VWO'
 
-const worthButton = document.getElementById('worthButton')
-worthButton.addEventListener('click', calculateWorth, false)
+fetch(`${uri}?date=${date}&symbols=${symbols}`)
+.then(response =>
+  console.log(response)
+)
+.catch(error => {
+	console.log(error)
+})
+
+// const options = {
+// 	uri: '/',
+// 	qs: {
+// 		access_token: 'xxxxx xxxxx' // -> uri + '?access_token=xxxxx%20xxxxx'
+// 	},
+// 	headers: {
+// 		'User-Agent': 'Request-Promise'
+// 	},
+// 	json: true
+// }
+
+// rp(options)
+// 	.then(repos => {
+// 		console.log('User has %d repos', repos.length)
+// 	})
+// 	.catch(error => {
+// 			// API call failed...
+// 	})
+
+// const initialState = {
+// 	realPortfolio: {
+
+// 	},
+// 	hypoPortfolio: {
+
+// 	}
+// }
+
+const calculateButton = document.getElementById('calculateButton')
+calculateButton.addEventListener('click', handleCalculation, false)
+
+const portfolioInput = document.getElementById('fileInput')
+portfolioInput.addEventListener('change', handleFiles, false)
 
 function handleFiles() {
+	const options = {
+		header: true
+	}
 	const file = this.files[0]
 	const reader = new FileReader()
 	reader.onload = () => {
-		const json = Papa.parse(reader.result, {header: true})
+		const json = Papa.parse(reader.result.trim(), {header: options.header})
 		processData(json)
 	}
 	reader.onerror = () => {
@@ -23,11 +66,9 @@ function handleFiles() {
 	reader.readAsText(file)
 }
 
-// Papa.parse(seed, {
-//  complete: results => {
-//    console.log('Finished: ', results.data)
-//  }
-// })
+function handleCalculation() {
+	const hypoInput = document.getElementById('textInput')
+}
 
 function processData(data) {
 	const sortedData = sortByDate(data)
@@ -45,27 +86,27 @@ function dispatchActions(sortedData) {
 		if(element.TRANSACTION.toUpperCase() === 'BUY') {
 			store.dispatch(buyStock({
 				[element.SYMBOL]: {
-					price: parseFloat(element.PRICE),
-					shares: parseInt(element.SHARES, 10)
+					shares: parseInt(element.SHARES, 10),
+					price: parseFloat(element.PRICE)
 				}
 			}))
 		}
 		else if(element.TRANSACTION.toUpperCase() === 'SELL') {
 			store.dispatch(sellStock({
 				[element.SYMBOL]: {
-					price: element.PRICE,
-					shares: element.SHARES
+					shares: element.SHARES,
+					price: element.PRICE
 				}
 			}))
 		}
 	})
 }
 
-function calculateWorth() {
-	_map(store.getState(), element =>
-		element.shares * element.price
-	)
-	.reduce((previous, current) =>
-		previous + current
-	)
-}
+// function calculateWorth() {
+// 	_map(store.getState(), element =>
+// 		element.shares * element.price
+// 	)
+// 	.reduce((previous, current) =>
+// 		previous + current
+// 	)
+// }

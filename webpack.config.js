@@ -7,7 +7,14 @@ const jeet = require('jeet')
 module.exports = {
 	devtool: 'eval-source-map',
 	devServer: {
-		contentBase: './build'
+		contentBase: './build',
+		hot: true,
+		inline: true,
+		progress: true,
+		historyApiFallback: true,
+		stats: 'errors-only',
+		port: 8080,
+		host: '127.0.0.1'
 	},
 	entry: './src/main.js',
 	output: {
@@ -15,6 +22,7 @@ module.exports = {
 		filename: 'bundle.js'
 	},
 	plugins: [
+		new webpack.HotModuleReplacementPlugin(),
 		new HtmlWebpackPlugin({
 			title: 'Investment Counter Factual',
 			template: 'index.ejs',
