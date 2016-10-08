@@ -7,7 +7,7 @@ When testing action creators we want to test whether the correct action
 creator was called and also whether the right action was returned.
 */
 
-test('buy action', t => {
+test('buy real action', t => {
 	const payload = {
 		VTI: {
 			shares: 3,
@@ -15,13 +15,13 @@ test('buy action', t => {
 		}
 	}
 	const expectedAction = {
-		type: actionTypes.BUY,
+		type: actionTypes.buyReal,
 		payload
 	}
-	t.deepEqual(actionCreators.buyStock(payload), expectedAction)
+	t.deepEqual(actionCreators.buyRealStock(payload), expectedAction)
 })
 
-test('sell action', t => {
+test('sell real action', t => {
 	const payload = {
 		VTI: {
 			shares: 3,
@@ -29,8 +29,8 @@ test('sell action', t => {
 		}
 	}
 	const expectedAction = {
-		type: actionTypes.SELL,
+		type: actionTypes.sellReal,
 		payload
 	}
-	t.deepEqual(actionCreators.sellStock(payload), expectedAction)
+	t.deepEqual(actionCreators.sellRealStock(payload), expectedAction)
 })

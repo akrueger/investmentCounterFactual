@@ -1,15 +1,29 @@
-import { BUY, SELL } from './actionTypes.js'
+import { buyHypo, sellHypo, buyReal, sellReal } from './actionTypes.js'
 
-export function buyStock(payload) {
+export function buyHypoStock(payload) {
 	return {
-		type: BUY,
+		type: buyHypo,
 		payload
 	}
 }
 
-export function sellStock(payload) {
+export function sellHypoStock(payload) {
 	return {
-		type: SELL,
+		type: sellHypo,
+		payload
+	}
+}
+
+export function buyRealStock(payload) {
+	return {
+		type: buyReal,
+		payload
+	}
+}
+
+export function sellRealStock(payload) {
+	return {
+		type: sellReal,
 		payload
 	}
 }

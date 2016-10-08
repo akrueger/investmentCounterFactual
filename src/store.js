@@ -1,7 +1,14 @@
-import { createStore, compose, applyMiddleware } from 'redux'
-import portfolioReducer from './reducer'
+import { createStore, combineReducers, compose, applyMiddleware } from 'redux'
+import * as reducers from './reducers'
 
-const store = createStore(portfolioReducer, compose(
+const initialState = {
+	realPortfolio: {},
+	hypoPortfolio: {}
+}
+
+const reducer = combineReducers(reducers)
+
+const store = createStore(reducer, initialState, compose(
 	applyMiddleware(),
 	window.devToolsExtension ? window.devToolsExtension() : f => f
 ))

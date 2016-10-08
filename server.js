@@ -9,29 +9,30 @@ const app = koa()
 app.use(logger())
 
 router.get('/api', function * (next) {
-	const date = this.query.date
+	const beginDate = this.query.beginDate
+	const endDate = this.query.endDate
+	const period = this.query.period
 	let inputSymbols = this.query.symbols
 	if(!Array.isArray(inputSymbols)) {
 		inputSymbols = [inputSymbols]
 	}
 	this.body = yield yahooFinance.historical({
 		symbols: inputSymbols,
-		from: date,
-		to: date
+		from: beginDate,
+		to: endDate,
+		period
 	}).then(response =>
 		response
-	).catch(error =>
-		console.log(error)
-	)
+	).catch(error => {
+		this.body = { message: error.message }
+		this.status = error.status || 500
+	})
 })
 
 app.use(router.routes())
 app.use(router.allowedMethods())
 app.use(webpackDevServer({
-	config: './webpack.config.js',
-	log: {
-		level: 'verbose'
-	}
+	config: './webpack.config.js'
 }))
 
 app.listen(2333)

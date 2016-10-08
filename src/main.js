@@ -2,63 +2,21 @@ import _map from 'lodash.map'
 import moment from 'moment'
 import Papa from 'papaparse'
 import store from './store.js'
-import { buyStock, sellStock } from './actionCreators.js'
+import * as actionCreators from './actionCreators.js'
 
-const uri = '/api'
-const date = '2014-12-02'
-const symbols = 'VWO'
+const hypoInput = document.getElementById('textInput')
 
-fetch(`${uri}?date=${date}&symbols=${symbols}`)
-.then(response =>
-  console.log(response)
-)
-.catch(error => {
-	console.log(error)
-})
-
-// const options = {
-// 	uri: '/',
-// 	qs: {
-// 		access_token: 'xxxxx xxxxx' // -> uri + '?access_token=xxxxx%20xxxxx'
-// 	},
-// 	headers: {
-// 		'User-Agent': 'Request-Promise'
-// 	},
-// 	json: true
-// }
-
-// rp(options)
-// 	.then(repos => {
-// 		console.log('User has %d repos', repos.length)
-// 	})
-// 	.catch(error => {
-// 			// API call failed...
-// 	})
-
-// const initialState = {
-// 	realPortfolio: {
-
-// 	},
-// 	hypoPortfolio: {
-
-// 	}
-// }
-
-const calculateButton = document.getElementById('calculateButton')
-calculateButton.addEventListener('click', handleCalculation, false)
+// const calculateButton = document.getElementById('calculateButton')
+// calculateButton.addEventListener('click', handleCalculation, false)
 
 const portfolioInput = document.getElementById('fileInput')
-portfolioInput.addEventListener('change', handleFiles, false)
+portfolioInput.addEventListener('change', handleCSV, false)
 
-function handleFiles() {
-	const options = {
-		header: true
-	}
+function handleCSV() {
 	const file = this.files[0]
 	const reader = new FileReader()
 	reader.onload = () => {
-		const json = Papa.parse(reader.result.trim(), {header: options.header})
-		processData(json)
+		parseCSV(reader.result.trim())
 	}
 	reader.onerror = () => {
 		throw new Error('Error reading CSV file')
@@ -66,43 +24,120 @@ function handleFiles() {
 	reader.readAsText(file)
 }
 
-function handleCalculation() {
-	const hypoInput = document.getElementById('textInput')
+function fetchHypo({beginDate, endDate, period, symbols, realShares, realPrice}) {
+	return fetch(`/api?beginDate=${beginDate}&endDate=${endDate}&symbols=${symbols}&period=${period}`)
+		.then(response =>
+			response.json()
+				.then(quote =>
+					createHypoActionObject(quote, beginDate, endDate, symbols, realShares, realPrice)
+				)
+		)
+		.catch(error => {
+			// different error?
+			console.log(error)
+		})
 }
 
-function processData(data) {
-	const sortedData = sortByDate(data)
-	dispatchActions(sortedData)
+// function handleCalculation() {
+// 	calculate()
+// }
+
+function parseCSV(csvTransactions) {
+	const options = {
+		header: true
+	}
+	const jsonTransactions = Papa.parse(csvTransactions, options)
+	processData(jsonTransactions.data, jsonTransactions.meta.fields)
 }
 
-function sortByDate(transactions) {
-	return transactions.data.sort((a, b) =>
-		moment(a.DATE).diff(b.DATE)
+function processData(transactions, fields) {
+	dispatchActions(
+		sortByDate(
+			lowerCase(transactions, fields)
+		)
 	)
 }
 
-function dispatchActions(sortedData) {
-	sortedData.forEach(element => {
-		if(element.TRANSACTION.toUpperCase() === 'BUY') {
-			store.dispatch(buyStock({
-				[element.SYMBOL]: {
-					shares: parseInt(element.SHARES, 10),
-					price: parseFloat(element.PRICE)
-				}
-			}))
+function lowerCase(transactions, fields) {
+	return transactions.map(element => {
+		// Refactor
+		const obj = {}
+		fields.forEach(key => {
+			if(key.toLowerCase() === 'transaction') {
+				obj[key.toLowerCase()] = element[key].toLowerCase()
+			}
+			else if(key.toLowerCase() === 'symbol') {
+				obj[key.toLowerCase()] = element[key].toUpperCase()
+			}
+			else {
+				obj[key.toLowerCase()] = element[key]
+			}
+		})
+		return obj
+	})
+}
+
+function sortByDate(transactions) {
+	return transactions.sort((a, b) =>
+		moment(a.date).diff(b.date)
+	)
+}
+
+function dispatchActions(transactions) {
+	// DRY refactor
+	transactions.forEach(element => {
+		if(element.transaction === 'buy') {
+			store.dispatch(actionCreators.buyRealStock(createRealActionObject(element)))
+			fetchHypo({
+				beginDate: element.date,
+				endDate: element.date,
+				period: 'd',
+				symbols: hypoInput.value.toUpperCase(),
+				realShares: parseFloat(element.shares),
+				realPrice: parseFloat(element.price)
+			})
 		}
-		else if(element.TRANSACTION.toUpperCase() === 'SELL') {
-			store.dispatch(sellStock({
-				[element.SYMBOL]: {
-					shares: element.SHARES,
-					price: element.PRICE
-				}
-			}))
+		else if(element.transaction === 'sell') {
+			store.dispatch(actionCreators.sellRealStock(createRealActionObject(element)))
+			store.dispatch(actionCreators.sellHypoStock(fetchHypo({
+				beginDate: element.date,
+				endDate: element.date,
+				period: 'd',
+				symbols: hypoInput.value.toUpperCase(),
+				realShares: parseFloat(element.shares),
+				realPrice: parseFloat(element.price)
+			})))
+		}
+		else {
+			// error invalid transaction type
+			console.log('Transaction type is invalid')
 		}
 	})
 }
 
-// function calculateWorth() {
+function createRealActionObject(element) {
+	return {
+		[element.symbol]: {
+			date: element.date,
+			shares: parseFloat(element.shares),
+			price: parseFloat(element.price)
+		}
+	}
+}
+
+function createHypoActionObject(quote, beginDate, endDate, symbols, realShares, realPrice) {
+	const closePrice = quote[symbols][0].close
+	// Do we want a dispatch action here?
+	store.dispatch(actionCreators.buyHypoStock({
+		[symbols]: {
+			date: beginDate,
+			shares: (realShares * realPrice) / closePrice,
+			price: closePrice
+		}
+	}))
+}
+
+// function calculate() {
 // 	_map(store.getState(), element =>
 // 		element.shares * element.price
 // 	)
