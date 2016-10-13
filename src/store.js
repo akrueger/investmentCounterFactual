@@ -2,8 +2,10 @@ import { createStore, combineReducers, compose, applyMiddleware } from 'redux'
 import * as reducers from './reducers'
 
 const initialState = {
-	realPortfolio: {},
-	hypoPortfolio: {}
+	realSecurities: {},
+	hypoSecurities: {},
+	realWorth: {},
+	hypoWorth: {}
 }
 
 const reducer = combineReducers(reducers)

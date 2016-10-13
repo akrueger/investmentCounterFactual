@@ -4,8 +4,8 @@ import * as actionTypes from '../src/actionTypes'
 
 test('empty action', t => {
 	const expectedState = {}
-	t.deepEqual(reducers.realPortfolio(undefined, {}), expectedState)
-	t.deepEqual(reducers.hypoPortfolio(undefined, {}), expectedState)
+	t.deepEqual(reducers.realSecurities(undefined, {}), expectedState)
+	t.deepEqual(reducers.hypoSecurities(undefined, {}), expectedState)
 })
 
 test('buy action', t => {
@@ -70,9 +70,9 @@ test('buy action', t => {
 			price: 19.39
 		}
 	}
-	t.deepEqual(reducers.realPortfolio({}, action1), expectedState1)
-	t.deepEqual(reducers.realPortfolio(expectedState1, action2), expectedState2)
-	t.deepEqual(reducers.realPortfolio(expectedState2, action3), expectedState3)
+	t.deepEqual(reducers.realSecurities({}, action1), expectedState1)
+	t.deepEqual(reducers.realSecurities(expectedState1, action2), expectedState2)
+	t.deepEqual(reducers.realSecurities(expectedState2, action3), expectedState3)
 })
 
 test('sell action', t => {
@@ -100,5 +100,5 @@ test('sell action', t => {
 			price: 29.19
 		}
 	}
-	t.deepEqual(reducers.realPortfolio(initialState, action), expectedState)
+	t.deepEqual(reducers.realSecurities(initialState, action), expectedState)
 })

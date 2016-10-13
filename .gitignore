@@ -1,6 +1,7 @@
 node_modules/
 build/
 *.json
+!package.json
 .DS_Store
 *.csv
 *.eslintcache

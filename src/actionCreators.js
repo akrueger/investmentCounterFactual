@@ -1,4 +1,4 @@
-import { buyHypo, sellHypo, buyReal, sellReal } from './actionTypes.js'
+import { buyHypo, sellHypo, buyReal, sellReal, realWorth, hypoWorth } from './actionTypes.js'
 
 export function buyHypoStock(payload) {
 	return {
@@ -24,6 +24,20 @@ export function buyRealStock(payload) {
 export function sellRealStock(payload) {
 	return {
 		type: sellReal,
+		payload
+	}
+}
+
+export function calculateRealWorth(payload) {
+	return {
+		type: realWorth,
+		payload
+	}
+}
+
+export function calculateHypoWorth(payload) {
+	return {
+		type: hypoWorth,
 		payload
 	}
 }

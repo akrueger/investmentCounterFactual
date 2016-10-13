@@ -12,10 +12,7 @@ router.get('/api', function * (next) {
 	const beginDate = this.query.beginDate
 	const endDate = this.query.endDate
 	const period = this.query.period
-	let inputSymbols = this.query.symbols
-	if(!Array.isArray(inputSymbols)) {
-		inputSymbols = [inputSymbols]
-	}
+	const inputSymbols = (this.query.symbols).split(',')
 	this.body = yield yahooFinance.historical({
 		symbols: inputSymbols,
 		from: beginDate,
@@ -36,7 +33,3 @@ app.use(webpackDevServer({
 }))
 
 app.listen(2333)
-
-// moment().format('YYYY-MM-DD')
-
-// 'd' (daily), 'w' (weekly), 'm' (monthly), 'v' (dividends only)
