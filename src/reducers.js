@@ -1,4 +1,4 @@
-import * as transactions from './helpers/transactions.js'
+import * as transactions from './helpers/transactions'
 
 export function realSecurities(state = {}, action) {
 	switch(action.type) {

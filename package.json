@@ -3,8 +3,8 @@
   "version": "0.0.1",
   "description": "What if you had just invested all your money in one big passively managed index fund? Would your investment return be doing better?",
   "scripts": {
-    "start": "yarn run build && node server.js",
-    "build": "yarn run lint && yarn run test && yarn run clean && webpack",
+    "start": "npm run build && node server.js",
+    "build": "npm run lint && npm run test && npm run clean && webpack",
     "lint": "eslint . --ext .js --ext .jsx --cache",
     "test": "ava",
     "clean": "rm -rf build/*"
@@ -39,6 +39,8 @@
     "eslint-config-airbnb": "^12.0.0",
     "eslint-import-resolver-webpack": "^0.6.0",
     "eslint-loader": "^1.5.0",
+    "eslint-plugin-import": "^2.0.1",
+    "eslint-plugin-jsx-a11y": "^2.2.3",
     "eslint-plugin-react": "^6.4.1",
     "html-webpack-plugin": "^2.22.0",
     "jeet": "^6.1.5",
@@ -58,9 +60,5 @@
     "stylus-loader": "^2.3.1",
     "webpack": "^1.13.2",
     "yahoo-finance": "^0.2.14"
-  },
-  "peerDependencies": {
-    "eslint-plugin-import": "^2.0.1",
-    "eslint-plugin-jsx-a11y": "^2.2.3"
   }
 }

@@ -1,4 +1,4 @@
-import { buyHypo, sellHypo, buyReal, sellReal, realWorth, hypoWorth } from './actionTypes.js'
+import { buyHypo, sellHypo, buyReal, sellReal, realWorth, hypoWorth } from './actionTypes'
 
 export function buyHypoStock(payload) {
 	return {

@@ -1,8 +1,8 @@
 import _map from 'lodash.map'
 import moment from 'moment'
 import Papa from 'papaparse'
-import store from './store.js'
-import * as actionCreators from './actionCreators.js'
+import store from './store'
+import * as actionCreators from './actionCreators'
 
 const hypoInput = document.getElementById('textInput')
 
@@ -46,6 +46,7 @@ function processData(transactions, fields) {
 	// REFACTOR -- too much going on
 	debugger
 	const processedTransactions = sortByDate(removeStrings(lowerCase(transactions, fields)))
+	binarySearch(processedTransactions, {date: '2015-11-03'})
 	const realSymbols = Array.from(new Set(processedTransactions.map(element => element.symbol)))
 	const hypoSymbol = hypoInput.value.toUpperCase()
 	fetchQuotes({
@@ -179,6 +180,27 @@ function calculate() {
 	.reduce((previous, current) =>
 		previous + current
 	)
+}
+
+function binarySearch(array, element) {
+	let low = 0
+	let high = array.length - 1
+
+	while(low <= high) {
+		const mid = Math.floor((low + high) / 2)
+		const guess = array[mid]
+
+		if(guess.date === element.date) {
+			return array[mid]
+		}
+		if(guess.date > element.date) {
+			high = mid - 1
+		}
+		else {
+			low = mid + 1
+		}
+	}
+	return undefined
 }
 
 // 'd' (daily), 'w' (weekly), 'm' (monthly), 'v' (dividends only)
