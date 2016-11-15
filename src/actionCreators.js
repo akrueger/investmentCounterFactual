@@ -1,4 +1,4 @@
-import { buyHypo, sellHypo, buyReal, sellReal, dividendReal, dividendHypo, realWorth, hypoWorth } from './actionTypes'
+import { buyHypo, sellHypo, buyReal, sellReal, dividendReal, dividendHypo, splitReal, splitHypo, realWorth, hypoWorth } from './actionTypes'
 
 export function buyHypoStock(payload) {
 	return {
@@ -38,6 +38,20 @@ export function dividendRealStock(payload) {
 export function dividendHypoStock(payload) {
 	return {
 		type: dividendHypo,
+		payload
+	}
+}
+
+export function splitRealStock(payload) {
+	return {
+		type: splitReal,
+		payload
+	}
+}
+
+export function splitHypoStock(payload) {
+	return {
+		type: splitHypo,
 		payload
 	}
 }

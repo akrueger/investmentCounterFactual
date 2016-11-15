@@ -40,5 +40,22 @@ export function reinvestDividend(state, action) {
 			}
 		}
 	}
-	return Object.assign({}, state, action.payload)
+	return state
+}
+
+export function splitStock(state, action) {
+	const symbol = Object.keys(action.payload)[0]
+	if(Object.keys(state).includes(symbol)) {
+		const splitRatio = action.payload[symbol].splitRatio
+		const price = action.payload[symbol].price
+		const currentShares = state[symbol].shares
+		return {...state,
+			[symbol]: {
+				date: action.payload[symbol].date,
+				shares: currentShares * splitRatio,
+				price
+			}
+		}
+	}
+	return state
 }

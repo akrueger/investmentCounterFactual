@@ -1,13 +1,15 @@
-import * as transactions from './helpers/transactions'
+import {buyStock, sellStock, reinvestDividend, splitStock} from './helpers/transactions'
 
 export function realSecurities(state = {}, action) {
 	switch(action.type) {
 		case 'buyReal':
-			return transactions.buyStock(state, action)
+			return buyStock(state, action)
 		case 'sellReal':
-			return transactions.sellStock(state, action)
+			return sellStock(state, action)
 		case 'dividendReal':
-			return transactions.reinvestDividend(state, action)
+			return reinvestDividend(state, action)
+		case 'splitReal':
+			return splitStock(state, action)
 		default:
 			return state
 	}
@@ -16,11 +18,13 @@ export function realSecurities(state = {}, action) {
 export function hypoSecurities(state = {}, action) {
 	switch(action.type) {
 		case 'buyHypo':
-			return transactions.buyStock(state, action)
+			return buyStock(state, action)
 		case 'sellHypo':
-			return transactions.sellStock(state, action)
+			return sellStock(state, action)
 		case 'dividendHypo':
-			return transactions.reinvestDividend(state, action)
+			return reinvestDividend(state, action)
+		case 'splitHypo':
+			return splitStock(state, action)
 		default:
 			return state
 	}

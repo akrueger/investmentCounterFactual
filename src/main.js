@@ -2,7 +2,8 @@ import Papa from 'papaparse'
 import store from './store'
 import * as actionCreators from './actionCreators'
 import {getSplits, getQuotes, processDividends} from './helpers/retrieve'
-import {sortByDate, removeStrings, lowerCase, formatDate, binarySearch, } from './helpers/utility'
+import {sortByDate, removeStrings, lowerCase, formatDate, binarySearch} from './helpers/utility'
+import calculateValues from './helpers/worthCalculations'
 
 const hypoInput = document.getElementById('textInput')
 
@@ -30,7 +31,6 @@ function parseCSV(csvTransactions) {
 }
 
 function mungeData(transactions, fields) {
-	// REFACTOR -- too much going on
 	const processedTransactions = sortByDate(removeStrings(lowerCase(transactions, fields)))
 	const hypoSymbol = hypoInput.value.toUpperCase()
 	const realSymbols = Array.from(new Set(processedTransactions.map(element => element.symbol)))
@@ -68,6 +68,7 @@ function processTransactions(combinedTransactions, quotes, hypoSymbol) {
 			case (transactionElement.transaction === 'buy' || 'sell'): {
 				const quotesHypoElement = binarySearch(quotes[hypoSymbol], transactionElement.date)
 				dispatchActions({
+					hypoSymbol,
 					quotes,
 					type: transactionElement.transaction,
 					date: transactionElement.date,
@@ -77,7 +78,6 @@ function processTransactions(combinedTransactions, quotes, hypoSymbol) {
 						price: transactionElement.price
 					},
 					hypo: {
-						symbol: hypoSymbol,
 						shares: (transactionElement.shares * transactionElement.price) / quotesHypoElement.close,
 						price: quotesHypoElement.close
 					}
@@ -86,20 +86,27 @@ function processTransactions(combinedTransactions, quotes, hypoSymbol) {
 			}
 			case (transactionElement.transaction === 'dividend'):
 				dispatchActions({
+					hypoSymbol,
 					quotes,
 					date: transactionElement.date,
 					type: transactionElement.transaction,
-					hypo: {
-						symbol: hypoSymbol
-					},
-					dividend: {
-						symbol: transactionElement.symbol,
-						dividendYield: transactionElement.dividendYield,
-						price: transactionElement.price
-					}
+					symbol: transactionElement.symbol,
+					dividendYield: transactionElement.dividendYield,
+					price: transactionElement.price
 				})
 				break
-			case (transactionElement.transaction === 'split'):
+			case (transactionElement.transaction === 'split'): {
+				const splitPrice = binarySearch(quotes[transactionElement.symbol], transactionElement.date)
+				dispatchActions({
+					hypoSymbol,
+					quotes,
+					date: transactionElement.date,
+					type: transactionElement.transaction,
+					symbol: transactionElement.symbol,
+					splitRatio: transactionElement.splitRatio,
+					price: splitPrice.close
+				})
+			}
 				break
 			default:
 				throw new Error('Invalid transaction')
@@ -107,9 +114,16 @@ function processTransactions(combinedTransactions, quotes, hypoSymbol) {
 	})
 }
 
-function dispatchActions({date, quotes, type, real, hypo, dividend}) {
+function dispatchActions({date, quotes, type, real, hypo, symbol, hypoSymbol, shares, price, dividendYield, splitRatio}) {
 	switch(type) {
 		case 'buy':
+			store.dispatch(actionCreators.buyHypoStock({
+				[hypoSymbol]: {
+					date,
+					shares: hypo.shares,
+					price: hypo.price
+				}
+			}))
 			store.dispatch(actionCreators.buyRealStock({
 				[real.symbol]: {
 					date,
@@ -117,15 +131,15 @@ function dispatchActions({date, quotes, type, real, hypo, dividend}) {
 					price: real.price
 				}
 			}))
-			store.dispatch(actionCreators.buyHypoStock({
-				[hypo.symbol]: {
+			break
+		case 'sell':
+			store.dispatch(actionCreators.sellHypoStock({
+				[hypoSymbol]: {
 					date,
 					shares: hypo.shares,
 					price: hypo.price
 				}
 			}))
-			break
-		case 'sell':
 			store.dispatch(actionCreators.sellRealStock({
 				[real.symbol]: {
 					date,
@@ -133,67 +147,41 @@ function dispatchActions({date, quotes, type, real, hypo, dividend}) {
 					price: real.price
 				}
 			}))
-			store.dispatch(actionCreators.sellHypoStock({
-				[hypo.symbol]: {
-					date,
-					shares: hypo.shares,
-					price: hypo.price
-				}
-			}))
 			break
-		case 'dividend':
-			if(dividend.symbol === hypo.symbol) {
-				store.dispatch(actionCreators.dividendHypoStock({
-					[dividend.symbol]: {
-						date: dividend.date,
-						price: dividend.price,
-						dividendYield: dividend.dividendYield
-					}
-				}))
+		case 'dividend': {
+			const dividendObject = {
+				[symbol]: {
+					date,
+					price,
+					dividendYield
+				}
+			}
+			if(symbol === hypoSymbol) {
+				store.dispatch(actionCreators.dividendHypoStock(dividendObject))
 			}
 			else {
-				store.dispatch(actionCreators.dividendRealStock({
-					[dividend.symbol]: {
-						date: dividend.date,
-						price: dividend.price,
-						dividendYield: dividend.dividendYield
-					}
-				}))
+				store.dispatch(actionCreators.dividendRealStock(dividendObject))
 			}
 			break
+		}
+		case 'split': {
+			const splitObject = {
+				[symbol]: {
+					date,
+					price,
+					splitRatio
+				}
+			}
+			if(symbol === hypoSymbol) {
+				store.dispatch(actionCreators.splitHypoStock(splitObject))
+			}
+			else {
+				store.dispatch(actionCreators.splitRealStock(splitObject))
+			}
+			break
+		}
 		default:
 			throw new Error('Invalid transaction')
 	}
-	calculateValues({type, date, quotes, hypo})
-}
-
-function calculateValues({date, quotes, hypo}) {
-	const currentRealSymbols = Object.keys(store.getState().realSecurities)
-	const currentHypoSymbol = store.getState().hypoSecurities[hypo.symbol]
-	const currentAllSymbols = currentRealSymbols.concat(currentHypoSymbol)
-	if(date) {
-		store.dispatch(actionCreators.calculateRealWorth({
-			worth: parseInt(calculateRealValue({date, quotes, currentRealSymbols}).toFixed(0), 10)
-		}))
-		store.dispatch(actionCreators.calculateHypoWorth({
-			worth: calculateHypoValue(hypo)
-		}))
-	}
-}
-
-function calculateRealValue({date, quotes, currentRealSymbols}) {
-	return currentRealSymbols.map(element => {
-		const currentPrice = binarySearch(quotes[element], date).close
-		return store.getState().realSecurities[element].shares * currentPrice
-	})
-	.reduce((previous, current) =>
-		previous + current
-	)
-}
-
-function calculateHypoValue(hypo) {
-	const currentShares = store.getState().hypoSecurities[hypo.symbol].shares
-	const currentPrice = hypo.price
-	const worth = currentShares * currentPrice
-	return parseInt(worth.toFixed(0), 10)
+	calculateValues(type, date, quotes, hypoSymbol)
 }

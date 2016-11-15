@@ -64,7 +64,7 @@ function processSplits(symbol, splitData) {
 			date,
 			symbol,
 			transaction: 'split',
-			shares: (numerator / denominator)
+			splitRatio: (numerator / denominator)
 		})
 	})
 }
