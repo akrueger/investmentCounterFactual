@@ -25,3 +25,20 @@ export function sellStock(state, action) {
 	}
 	return Object.assign({}, state, action.payload)
 }
+
+export function reinvestDividend(state, action) {
+	const symbol = Object.keys(action.payload)[0]
+	if(Object.keys(state).includes(symbol)) {
+		const dividendYield = action.payload[symbol].dividendYield
+		const price = action.payload[symbol].price
+		const currentShares = state[symbol].shares
+		return {...state,
+			[symbol]: {
+				date: action.payload[symbol].date,
+				shares: ((dividendYield * currentShares) / price) + currentShares,
+				price
+			}
+		}
+	}
+	return Object.assign({}, state, action.payload)
+}

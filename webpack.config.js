@@ -2,7 +2,6 @@ const path = require('path')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const webpack = require('webpack')
 const poststylus = require('poststylus')
-const jeet = require('jeet')
 
 module.exports = {
 	devtool: 'eval-source-map',
@@ -60,7 +59,6 @@ module.exports = {
 	},
 	stylus: {
 		use: [
-			jeet(),
 			poststylus(['autoprefixer'])
 		]
 	}

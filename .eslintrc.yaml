@@ -17,7 +17,7 @@ rules:
   func-names: off
   max-len:
     - error
-    - code: 120
+    - code: 150
   no-tabs: off
   indent:
     - error
@@ -75,6 +75,8 @@ rules:
         for:
           after: false
         if:
+          after: false
+        catch:
           after: false
   jsx-quotes: 
     - error
