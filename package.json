@@ -4,7 +4,7 @@
   "description": "What if you had just invested all your money in one big passively managed index fund? Would your investment return be doing better?",
   "scripts": {
     "start": "yarn run build && node --harmony server.js",
-    "build": "yarn run lint && yarn run test && yarn run clean && webpack",
+    "build": "yarn run gauntlet && yarn run clean && webpack",
     "gauntlet": "yarn run lint && yarn run test",
     "lint": "eslint . --ext .js --ext .jsx --cache",
     "test": "ava",
