@@ -4,16 +4,12 @@ import {binarySearch} from './utility'
 
 export default function calculateValues(type, date, quotes, hypoSymbol) {
 	const currentRealSymbols = Object.keys(store.getState().realSecurities)
-	const currentHypoSymbol = store.getState().hypoSecurities[hypoSymbol]
-	const currentAllSymbols = currentRealSymbols.concat(currentHypoSymbol)
-	if(date) {
-		store.dispatch(actionCreators.calculateRealWorth({
-			worth: parseInt(calculateRealValue(date, quotes, currentRealSymbols).toFixed(0), 10)
-		}))
-		store.dispatch(actionCreators.calculateHypoWorth({
-			worth: calculateHypoValue(quotes, hypoSymbol, date)
-		}))
-	}
+	store.dispatch(actionCreators.calculateRealWorth({
+		worth: parseInt(calculateRealValue(date, quotes, currentRealSymbols).toFixed(0), 10)
+	}))
+	store.dispatch(actionCreators.calculateHypoWorth({
+		worth: calculateHypoValue(quotes, hypoSymbol, date)
+	}))
 }
 
 function calculateRealValue(date, quotes, currentRealSymbols) {

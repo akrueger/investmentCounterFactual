@@ -10,6 +10,15 @@ export function formatDate(date) {
 	return moment(date).format('YYYY-MM-DD')
 }
 
+export function formSplitDate(split) {
+	const date = split.substr(0, 10)
+	const dateRegEx1 = /\b\d{2}[/]?\d{2}[/]?\d{4}\b/
+	const dateRegEx2 = /\b\d{4}[-]?\d{2}[-]?\d{2}\b/
+	return dateRegEx1.test(date) ?
+		moment(date, 'DD/MM/YYYY').format('YYYY-MM-DD') :
+		moment(date, 'YYYY-MM-DD').format('YYYY-MM-DD')
+}
+
 export function removeStrings(transactions) {
 	return transactions.map(element => (
 		{

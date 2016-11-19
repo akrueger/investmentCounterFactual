@@ -1,4 +1,5 @@
 import Papa from 'papaparse'
+import moment from 'moment'
 import store from './store'
 import * as actionCreators from './actionCreators'
 import {getSplits, getQuotes, processDividends} from './helpers/retrieve'
@@ -64,8 +65,14 @@ function mungeData(transactions, fields) {
 
 function processTransactions(combinedTransactions, quotes, hypoSymbol) {
 	combinedTransactions.forEach(transactionElement => {
+	// const iterator = combinedTransactions[Symbol.iterator]
+	// if(iterator.next().done) {
+		// calculate worth one final time at today's price -- remember to account for weekends and holidays
+	// 	moment().format('YYYY-MM-DD')
+	// }
+
 		switch(true) {
-			case (transactionElement.transaction === 'buy' || 'sell'): {
+			case (transactionElement.transaction === 'buy' || transactionElement.transaction === 'sell'): {
 				const quotesHypoElement = binarySearch(quotes[hypoSymbol], transactionElement.date)
 				dispatchActions({
 					hypoSymbol,
@@ -84,32 +91,43 @@ function processTransactions(combinedTransactions, quotes, hypoSymbol) {
 				})
 				break
 			}
-			case (transactionElement.transaction === 'dividend'):
-				dispatchActions({
-					hypoSymbol,
-					quotes,
-					date: transactionElement.date,
-					type: transactionElement.transaction,
-					symbol: transactionElement.symbol,
-					dividendYield: transactionElement.dividendYield,
-					price: transactionElement.price
-				})
+			case (transactionElement.transaction === 'dividend'): {
+				const currentRealSymbols = Object.keys(store.getState().realSecurities)
+				const currentAllSymbols = currentRealSymbols.concat([hypoSymbol])
+
+				if(currentAllSymbols.includes(transactionElement.symbol)) {
+					dispatchActions({
+						hypoSymbol,
+						quotes,
+						date: transactionElement.date,
+						type: transactionElement.transaction,
+						symbol: transactionElement.symbol,
+						dividendYield: transactionElement.dividendYield,
+						price: transactionElement.price
+					})
+				}
+			}
 				break
 			case (transactionElement.transaction === 'split'): {
-				const splitPrice = binarySearch(quotes[transactionElement.symbol], transactionElement.date)
-				dispatchActions({
-					hypoSymbol,
-					quotes,
-					date: transactionElement.date,
-					type: transactionElement.transaction,
-					symbol: transactionElement.symbol,
-					splitRatio: transactionElement.splitRatio,
-					price: splitPrice.close
-				})
+				const currentRealSymbols = Object.keys(store.getState().realSecurities)
+				const currentAllSymbols = currentRealSymbols.concat([hypoSymbol])
+
+				if(currentAllSymbols.includes(transactionElement.symbol)) {
+					const splitPrice = binarySearch(quotes[transactionElement.symbol], transactionElement.date)
+					dispatchActions({
+						hypoSymbol,
+						quotes,
+						date: transactionElement.date,
+						type: transactionElement.transaction,
+						symbol: transactionElement.symbol,
+						splitRatio: transactionElement.splitRatio,
+						price: splitPrice.close
+					})
+				}
 			}
 				break
 			default:
-				throw new Error('Invalid transaction')
+				throw new Error(`Invalid transaction: ${JSON.stringify(transactionElement)}`)
 		}
 	})
 }

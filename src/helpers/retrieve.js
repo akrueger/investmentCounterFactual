@@ -1,5 +1,4 @@
-import moment from 'moment'
-import {flatten, formatDate, binarySearch} from './utility'
+import {flatten, formatDate, formSplitDate, binarySearch} from './utility'
 
 export function getSplits({allSymbols, firstDate, lastDate}) {
 	const splitPromises = []
@@ -53,10 +52,9 @@ function fetchQuotes({beginDate, endDate, period, symbols}) {
 }
 
 function processSplits(symbol, splitData) {
-	const dateRegEx = /\b\d{2}[/]?\d{2}[/]?\d{4}\b/
-	const ratioRegEx = /\b\d{1,2}[:]\d{1}\b/
+	const ratioRegEx = /\b\d*[:]\d*\b/
 	return splitData.map(element => {
-		const date = moment(dateRegEx.exec(element)[0], 'DD-MM-YYYY').format('YYYY-MM-DD')
+		const date = formSplitDate(element)
 		const splitRatio = ratioRegEx.exec(element)[0]
 		const numerator = parseInt(splitRatio.substr(0, 1), 10)
 		const denominator = parseInt(splitRatio.substr(2, 2), 10)

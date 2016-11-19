@@ -5,8 +5,11 @@
   "scripts": {
     "start": "yarn run build && node --harmony server.js",
     "build": "yarn run lint && yarn run test && yarn run clean && webpack",
+    "gauntlet": "yarn run lint && yarn run test",
     "lint": "eslint . --ext .js --ext .jsx --cache",
     "test": "ava",
+    "precommit": "yarn run gauntlet",
+    "prepush": "yarn run gauntlet",
     "clean": "rm -rf build/*"
   },
   "ava": {
@@ -43,6 +46,7 @@
     "eslint-plugin-jsx-a11y": "^2.2.3",
     "eslint-plugin-react": "^6.4.1",
     "html-webpack-plugin": "^2.22.0",
+    "husky": "^0.11.9",
     "json-loader": "^0.5.4",
     "koa": "^1.2.4",
     "koa-logger": "^1.3.0",
@@ -54,6 +58,7 @@
     "papaparse": "^4.1.2",
     "poststylus": "^0.2.3",
     "redux": "^3.6.0",
+    "redux-logger": "^2.7.4",
     "style-loader": "^0.13.1",
     "stylus": "^0.54.5",
     "stylus-loader": "^2.3.1",
