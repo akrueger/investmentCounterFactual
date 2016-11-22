@@ -1,4 +1,5 @@
 import moment from 'moment'
+import 'moment-easter'
 
 export function flatten(array) {
 	return array.reduce((a, b) =>
@@ -12,9 +13,8 @@ export function formatDate(date) {
 
 export function formSplitDate(split) {
 	const date = split.substr(0, 10)
-	const dateRegEx1 = /\b\d{2}[/]?\d{2}[/]?\d{4}\b/
-	const dateRegEx2 = /\b\d{4}[-]?\d{2}[-]?\d{2}\b/
-	return dateRegEx1.test(date) ?
+	const dateRegEx = /\b\d{2}[/]?\d{2}[/]?\d{4}\b/
+	return dateRegEx.test(date) ?
 		moment(date, 'DD/MM/YYYY').format('YYYY-MM-DD') :
 		moment(date, 'YYYY-MM-DD').format('YYYY-MM-DD')
 }
@@ -53,6 +53,52 @@ export function sortByDate(transactions) {
 	return transactions.sort((a, b) =>
 		moment(a.date).diff(b.date)
 	)
+}
+
+export function findLastTradeDate(target) {
+	if(isDynamicHoliday(target) || isStaticHoliday(target) || isWeekend(target)) {
+		findLastTradeDate(target.subtract(1, 'day'))
+	}
+	return formatDate(target)
+}
+
+function isDynamicHoliday(date) {
+	// MLK, Washington's Birthday, Good Friday, Memorial Day, Labor Day, Thanksgiving
+	const dynamicHolidays = ['1-3-1', '2-3-1', '5-5-1', '9-1-1', '11-4-4']
+	const monthOfYear = date.month() + 1
+	const weekOfMonth = Math.ceil(date.date() / 7)
+	const dayOfWeek = date.day()
+	const test = `${monthOfYear}-${weekOfMonth}-${dayOfWeek}`
+	if(dynamicHolidays.includes(test)) {
+		return true
+	}
+	return false
+}
+
+function isStaticHoliday(date) {
+	// New Year's Day, Independence Day, Christmas
+	const holidays = ['01-01', '07-04', '12-25']
+	const goodFriday = findGoodFriday(date.year())
+	holidays.push(goodFriday.format('MM-DD'))
+	const monthOfYear = date.month() + 1
+	const dayOfMonth = date.date()
+	const test = `${monthOfYear}-${dayOfMonth}`
+	if(holidays.includes(test)) {
+		return true
+	}
+	return false
+}
+
+function findGoodFriday(year) {
+	return moment.easter(year).subtract(2, 'days')
+}
+
+function isWeekend(date) {
+	const dayOfWeek = date.day()
+	if(dayOfWeek === 0 || dayOfWeek === 6) {
+		return true
+	}
+	return false
 }
 
 export function binarySearch(array, element) {

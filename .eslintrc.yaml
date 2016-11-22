@@ -13,7 +13,6 @@ env:
 settings:
   import/resolver: webpack
 rules:
-  no-unused-vars: off
   func-names: off
   max-len:
     - error

@@ -1,11 +1,11 @@
 var yahooFinance = require('yahoo-finance')
 yahooFinance.historical({
   symbols: [
-    'AAPL'
+    'GNAT'
   ],
-  from: '2011-06-5',
-  to: '2014-6-14',
-  period: 'v'
+  from: '2016-11-10',
+  to: '2016-11-20',
+  period: 'd'
 }, function (err, quotes) {
   process.stdout.write(JSON.stringify(quotes))
 })

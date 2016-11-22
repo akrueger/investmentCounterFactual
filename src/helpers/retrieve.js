@@ -34,7 +34,7 @@ function fetchSplit(symbol) {
 				)
 		)
 		.catch(error => {
-			throw new Error('Error fetching portfolio splits')
+			throw new Error(`Error fetching portfolio splits: ${error}`)
 		})
 }
 

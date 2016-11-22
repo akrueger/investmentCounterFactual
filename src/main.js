@@ -3,7 +3,7 @@ import moment from 'moment'
 import store from './store'
 import * as actionCreators from './actionCreators'
 import {getSplits, getQuotes, processDividends} from './helpers/retrieve'
-import {sortByDate, removeStrings, lowerCase, formatDate, binarySearch} from './helpers/utility'
+import {sortByDate, removeStrings, lowerCase, formatDate, findLastTradeDate, binarySearch} from './helpers/utility'
 import calculateValues from './helpers/worthCalculations'
 
 const hypoInput = document.getElementById('textInput')
@@ -64,13 +64,8 @@ function mungeData(transactions, fields) {
 }
 
 function processTransactions(combinedTransactions, quotes, hypoSymbol) {
-	combinedTransactions.forEach(transactionElement => {
-	// const iterator = combinedTransactions[Symbol.iterator]
-	// if(iterator.next().done) {
-		// calculate worth one final time at today's price -- remember to account for weekends and holidays
-	// 	moment().format('YYYY-MM-DD')
-	// }
-
+	const transactionsLength = combinedTransactions.length - 1
+	combinedTransactions.forEach((transactionElement, index) => {
 		switch(true) {
 			case (transactionElement.transaction === 'buy' || transactionElement.transaction === 'sell'): {
 				const quotesHypoElement = binarySearch(quotes[hypoSymbol], transactionElement.date)
@@ -129,10 +124,28 @@ function processTransactions(combinedTransactions, quotes, hypoSymbol) {
 			default:
 				throw new Error(`Invalid transaction: ${JSON.stringify(transactionElement)}`)
 		}
+		if(index === transactionsLength) {
+			// Add most recent trade date to quotes
+			const currentRealSymbols = Object.keys(store.getState().realSecurities)
+			const currentAllSymbols = currentRealSymbols.concat([hypoSymbol])
+			const yesterday = moment().subtract(1, 'day')
+			const lastTradeDate = findLastTradeDate(yesterday)
+			getQuotes({
+				allSymbols: currentAllSymbols,
+				firstDate: lastTradeDate,
+				lastDate: lastTradeDate
+			}, 'd')
+				.then(data => {
+					Object.keys(data).forEach(element =>
+						quotes[element].push(data[element][0])
+					)
+					calculateValues(lastTradeDate, quotes, hypoSymbol)
+				})
+		}
 	})
 }
 
-function dispatchActions({date, quotes, type, real, hypo, symbol, hypoSymbol, shares, price, dividendYield, splitRatio}) {
+function dispatchActions({date, quotes, type, real, hypo, symbol, hypoSymbol, price, dividendYield, splitRatio}) {
 	switch(type) {
 		case 'buy':
 			store.dispatch(actionCreators.buyHypoStock({
@@ -201,5 +214,5 @@ function dispatchActions({date, quotes, type, real, hypo, symbol, hypoSymbol, sh
 		default:
 			throw new Error('Invalid transaction')
 	}
-	calculateValues(type, date, quotes, hypoSymbol)
+	calculateValues(date, quotes, hypoSymbol)
 }

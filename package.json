@@ -55,6 +55,7 @@
     "lodash-webpack-plugin": "^0.10.2",
     "lodash.map": "^4.6.0",
     "moment": "^2.15.1",
+    "moment-easter": "^0.1.0",
     "papaparse": "^4.1.2",
     "poststylus": "^0.2.3",
     "redux": "^3.6.0",

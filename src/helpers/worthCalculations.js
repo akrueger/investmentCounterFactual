@@ -2,13 +2,13 @@ import store from '../store'
 import * as actionCreators from '../actionCreators'
 import {binarySearch} from './utility'
 
-export default function calculateValues(type, date, quotes, hypoSymbol) {
+export default function calculateValues(date, quotes, hypoSymbol) {
 	const currentRealSymbols = Object.keys(store.getState().realSecurities)
 	store.dispatch(actionCreators.calculateRealWorth({
 		worth: parseInt(calculateRealValue(date, quotes, currentRealSymbols).toFixed(0), 10)
 	}))
 	store.dispatch(actionCreators.calculateHypoWorth({
-		worth: calculateHypoValue(quotes, hypoSymbol, date)
+		worth: calculateHypoValue(date, quotes, hypoSymbol)
 	}))
 }
 
@@ -22,7 +22,7 @@ function calculateRealValue(date, quotes, currentRealSymbols) {
 	)
 }
 
-function calculateHypoValue(quotes, hypoSymbol, date) {
+function calculateHypoValue(date, quotes, hypoSymbol) {
 	const currentShares = store.getState().hypoSecurities[hypoSymbol].shares
 	const currentPrice = binarySearch(quotes[hypoSymbol], date).close
 	const worth = currentShares * currentPrice
