@@ -1,5 +1,5 @@
 import moment from 'moment'
-import 'moment-easter'
+import findEaster from './easter'
 
 export function flatten(array) {
 	return array.reduce((a, b) =>
@@ -22,7 +22,7 @@ export function formSplitDate(split) {
 export function removeStrings(transactions) {
 	return transactions.map(element => (
 		{
-			date: element.date,
+			date: formatDate(element.date),
 			shares: parseFloat(element.shares),
 			symbol: element.symbol,
 			transaction: element.transaction
@@ -90,7 +90,7 @@ function isStaticHoliday(date) {
 }
 
 function findGoodFriday(year) {
-	return moment.easter(year).subtract(2, 'days')
+	return findEaster(year).subtract(2, 'days')
 }
 
 function isWeekend(date) {

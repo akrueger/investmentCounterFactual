@@ -1,3 +1,4 @@
+import 'datejs'
 import Papa from 'papaparse'
 import moment from 'moment'
 import store from './store'
