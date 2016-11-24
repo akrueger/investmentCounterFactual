@@ -18,10 +18,10 @@ export function getSplits({allSymbols, firstDate, lastDate}) {
 
 export function getQuotes({allSymbols, firstDate, lastDate}, period) {
 	return fetchQuotes({
+		symbols: allSymbols,
 		beginDate: firstDate,
 		endDate: lastDate,
-		period,
-		symbols: allSymbols
+		period
 	})
 }
 

@@ -1,4 +1,5 @@
 import moment from 'moment'
+import {getQuotes} from './retrieve'
 import findEaster from './easter'
 
 export function flatten(array) {
@@ -55,9 +56,28 @@ export function sortByDate(transactions) {
 	)
 }
 
-export function findLastTradeDate(target) {
+export function findLastTradeDate({date, symbol, shares, transaction}) {
+	return getQuotes({
+		allSymbols: symbol,
+		firstDate: formatDate(moment(date).subtract(30, 'days')),
+		lastDate: date
+	}, 'd').then(quotes => {
+		const promiseObjArray = quotes[symbol]
+		const promiseObjLength = promiseObjArray.length
+		const promiseValue = promiseObjArray[promiseObjLength - 1]
+		return {
+			date,
+			symbol,
+			shares,
+			transaction,
+			price: promiseValue.close
+		}
+	})
+}
+
+export function findLastOpenMarketDate(target) {
 	if(isDynamicHoliday(target) || isStaticHoliday(target) || isWeekend(target)) {
-		findLastTradeDate(target.subtract(1, 'day'))
+		findLastOpenMarketDate(target.subtract(1, 'day'))
 	}
 	return formatDate(target)
 }

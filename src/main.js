@@ -1,14 +1,13 @@
-import 'datejs'
 import Papa from 'papaparse'
 import moment from 'moment'
 import store from './store'
 import * as actionCreators from './actionCreators'
 import {getSplits, getQuotes, processDividends} from './helpers/retrieve'
-import {sortByDate, removeStrings, lowerCase, formatDate, findLastTradeDate, binarySearch} from './helpers/utility'
+import {sortByDate, removeStrings, lowerCase, formatDate, findLastTradeDate,
+	findLastOpenMarketDate, binarySearch} from './helpers/utility'
 import calculateValues from './helpers/worthCalculations'
 
 const hypoInput = document.getElementById('textInput')
-
 const portfolioInput = document.getElementById('fileInput')
 portfolioInput.addEventListener('change', handleCSV, false)
 
@@ -29,10 +28,10 @@ function parseCSV(csvTransactions) {
 		header: true
 	}
 	const jsonTransactions = Papa.parse(csvTransactions, options)
-	mungeData(jsonTransactions.data, jsonTransactions.meta.fields)
+	setUpDataMunge(jsonTransactions.data, jsonTransactions.meta.fields)
 }
 
-function mungeData(transactions, fields) {
+function setUpDataMunge(transactions, fields) {
 	const processedTransactions = sortByDate(removeStrings(lowerCase(transactions, fields)))
 	const hypoSymbol = hypoInput.value.toUpperCase()
 	const realSymbols = Array.from(new Set(processedTransactions.map(element => element.symbol)))
@@ -46,22 +45,32 @@ function mungeData(transactions, fields) {
 		lastDate
 	}
 
-	getSplits(inputData)
-		.then(processedSplits => {
-			getQuotes(inputData, 'd') // daily price quotes
-				.then(quotes => {
-					getQuotes(inputData, 'v') // dividend quotes
-						.then(dividends => {
-							const processedDividends = processDividends(allSymbols, quotes, dividends)
-							// Add price data
-							processedTransactions.forEach(element => {
-								element.price = binarySearch(quotes[element.symbol], formatDate(element.date)).close
-							})
-							const combinedTransactions = sortByDate(processedTransactions.concat(processedDividends).concat(processedSplits))
-							processTransactions(combinedTransactions, quotes, hypoSymbol)
-						})
-				})
+	mungeData({processedTransactions, hypoSymbol, inputData})
+}
+
+function mungeData({processedTransactions, hypoSymbol, inputData}) {
+	Promise.all([
+		getSplits(inputData),
+		getQuotes(inputData, 'd'), // daily price quotes
+		getQuotes(inputData, 'v') // dividend quotes
+	]).then(([processedSplits, quotes, dividends]) => {
+		const processedDividends = processDividends(inputData.allSymbols, quotes, dividends)
+		// Add price data
+		const processedTransactionsPromises = processedTransactions.map(element => {
+			const quoteMatch = binarySearch(quotes[element.symbol], formatDate(element.date))
+			if(quoteMatch) {
+				element.price = quoteMatch.close
+				return element
+			}
+			return new Promise(resolve => {
+				resolve(findLastTradeDate(element))
+			})
 		})
+		Promise.all(processedTransactionsPromises).then(finalProcessedTransactions => {
+			const combinedTransactions = sortByDate(finalProcessedTransactions.concat(processedDividends).concat(processedSplits))
+			processTransactions(combinedTransactions, quotes, hypoSymbol)
+		})
+	})
 }
 
 function processTransactions(combinedTransactions, quotes, hypoSymbol) {
@@ -130,7 +139,7 @@ function processTransactions(combinedTransactions, quotes, hypoSymbol) {
 			const currentRealSymbols = Object.keys(store.getState().realSecurities)
 			const currentAllSymbols = currentRealSymbols.concat([hypoSymbol])
 			const yesterday = moment().subtract(1, 'day')
-			const lastTradeDate = findLastTradeDate(yesterday)
+			const lastTradeDate = findLastOpenMarketDate(yesterday)
 			getQuotes({
 				allSymbols: currentAllSymbols,
 				firstDate: lastTradeDate,
