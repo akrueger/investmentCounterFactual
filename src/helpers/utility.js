@@ -1,6 +1,7 @@
 import moment from 'moment'
 import {getQuotes} from './retrieve'
 import findEaster from './easter'
+import * as lastPriceCache from './lastPriceCache'
 
 export function flatten(array) {
 	return array.reduce((a, b) =>
@@ -65,6 +66,8 @@ export function findLastTradeDate({date, symbol, shares, transaction}) {
 		const promiseObjArray = quotes[symbol]
 		const promiseObjLength = promiseObjArray.length
 		const promiseValue = promiseObjArray[promiseObjLength - 1]
+		// Update cache
+		lastPriceCache.setPrice(symbol, promiseValue.close)
 		return {
 			date,
 			symbol,

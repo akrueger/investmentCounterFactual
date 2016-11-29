@@ -1,6 +1,7 @@
 import store from '../store'
 import * as actionCreators from '../actionCreators'
 import {binarySearch} from './utility'
+import {getPrice} from './lastPriceCache'
 
 export default function calculateValues(date, quotes, hypoSymbol) {
 	const currentRealSymbols = Object.keys(store.getState().realSecurities)
@@ -14,8 +15,12 @@ export default function calculateValues(date, quotes, hypoSymbol) {
 
 function calculateRealValue(date, quotes, currentRealSymbols) {
 	return currentRealSymbols.map(element => {
-		const currentPrice = binarySearch(quotes[element], date).close
-		return store.getState().realSecurities[element].shares * currentPrice
+		const shares = store.getState().realSecurities[element].shares
+		const quoteMatch = binarySearch(quotes[element], date)
+		if(quoteMatch) {
+			return shares * quoteMatch.close
+		}
+		return shares * getPrice(element)
 	})
 	.reduce((previous, current) =>
 		previous + current
