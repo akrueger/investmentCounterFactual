@@ -158,13 +158,6 @@ function processTransactions(combinedTransactions, quotes, hypoSymbol) {
 function dispatchActions({date, quotes, type, real, hypo, symbol, hypoSymbol, price, dividendYield, splitRatio}) {
 	switch(type) {
 		case 'buy':
-			store.dispatch(actionCreators.buyHypoStock({
-				[hypoSymbol]: {
-					date,
-					shares: hypo.shares,
-					price: hypo.price
-				}
-			}))
 			store.dispatch(actionCreators.buyRealStock({
 				[real.symbol]: {
 					date,
@@ -172,20 +165,27 @@ function dispatchActions({date, quotes, type, real, hypo, symbol, hypoSymbol, pr
 					price: real.price
 				}
 			}))
-			break
-		case 'sell':
-			store.dispatch(actionCreators.sellHypoStock({
+			store.dispatch(actionCreators.buyHypoStock({
 				[hypoSymbol]: {
 					date,
 					shares: hypo.shares,
 					price: hypo.price
 				}
 			}))
+			break
+		case 'sell':
 			store.dispatch(actionCreators.sellRealStock({
 				[real.symbol]: {
 					date,
 					shares: real.shares,
 					price: real.price
+				}
+			}))
+			store.dispatch(actionCreators.sellHypoStock({
+				[hypoSymbol]: {
+					date,
+					shares: hypo.shares,
+					price: hypo.price
 				}
 			}))
 			break
@@ -197,11 +197,11 @@ function dispatchActions({date, quotes, type, real, hypo, symbol, hypoSymbol, pr
 					dividendYield
 				}
 			}
-			if(symbol === hypoSymbol) {
-				store.dispatch(actionCreators.dividendHypoStock(dividendObject))
+			if(symbol !== hypoSymbol) {
+				store.dispatch(actionCreators.dividendRealStock(dividendObject))
 			}
 			else {
-				store.dispatch(actionCreators.dividendRealStock(dividendObject))
+				store.dispatch(actionCreators.dividendHypoStock(dividendObject))
 			}
 			break
 		}
@@ -213,11 +213,11 @@ function dispatchActions({date, quotes, type, real, hypo, symbol, hypoSymbol, pr
 					splitRatio
 				}
 			}
-			if(symbol === hypoSymbol) {
-				store.dispatch(actionCreators.splitHypoStock(splitObject))
+			if(symbol !== hypoSymbol) {
+				store.dispatch(actionCreators.splitRealStock(splitObject))
 			}
 			else {
-				store.dispatch(actionCreators.splitRealStock(splitObject))
+				store.dispatch(actionCreators.splitHypoStock(splitObject))
 			}
 			break
 		}
