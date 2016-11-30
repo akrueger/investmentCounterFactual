@@ -137,19 +137,26 @@ function processTransactions(combinedTransactions, quotes, hypoSymbol) {
 		if(index === transactionsLength) {
 			// Add most recent trade date to quotes
 			const currentRealSymbols = Object.keys(store.getState().realSecurities)
-			const currentAllSymbols = currentRealSymbols.concat([hypoSymbol])
+			const activeRealSymbols = currentRealSymbols.filter(element =>
+				store.getState().realSecurities[element].shares > 0
+			)
+			const currentHypoSymbols = [hypoSymbol]
+			const activeHypoSymbols = currentHypoSymbols.filter(element =>
+				store.getState().hypoSecurities[element].shares > 0
+			)
+			const activeAllSymbols = activeRealSymbols.concat(activeHypoSymbols)
 			const yesterday = moment().subtract(1, 'day')
 			const lastTradeDate = findLastOpenMarketDate(yesterday)
 			getQuotes({
-				allSymbols: currentAllSymbols,
+				allSymbols: activeAllSymbols,
 				firstDate: lastTradeDate,
 				lastDate: lastTradeDate
 			}, 'd')
 				.then(data => {
-					Object.keys(data).forEach(element =>
+					Object.keys(data).forEach(element => {
 						quotes[element].push(data[element][0])
-					)
-					calculateValues(lastTradeDate, quotes, hypoSymbol)
+					})
+					calculateValues(lastTradeDate, data, hypoSymbol)
 				})
 		}
 	})

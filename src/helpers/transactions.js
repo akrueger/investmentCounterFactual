@@ -1,7 +1,8 @@
 export function buyStock(state, action) {
 	const symbol = Object.keys(action.payload)[0]
 	if(Object.keys(state).includes(symbol)) {
-		return {...state,
+		return {
+			...state,
 			[symbol]: {
 				date: action.payload[symbol].date,
 				shares: state[symbol].shares + action.payload[symbol].shares,
@@ -9,13 +10,17 @@ export function buyStock(state, action) {
 			}
 		}
 	}
-	return Object.assign({}, state, action.payload)
+	return {
+		...state,
+		...action.payload
+	}
 }
 
 export function sellStock(state, action) {
 	const symbol = Object.keys(action.payload)[0]
 	if(Object.keys(state).includes(symbol)) {
-		return {...state,
+		return {
+			...state,
 			[symbol]: {
 				date: action.payload[symbol].date,
 				shares: state[symbol].shares - action.payload[symbol].shares,
@@ -23,7 +28,10 @@ export function sellStock(state, action) {
 			}
 		}
 	}
-	return Object.assign({}, state, action.payload)
+	return {
+		...state,
+		...action.payload
+	}
 }
 
 export function reinvestDividend(state, action) {
@@ -31,7 +39,8 @@ export function reinvestDividend(state, action) {
 	const dividendYield = action.payload[symbol].dividendYield
 	const price = action.payload[symbol].price
 	const currentShares = state[symbol].shares
-	return {...state,
+	return {
+		...state,
 		[symbol]: {
 			date: action.payload[symbol].date,
 			shares: ((dividendYield * currentShares) / price) + currentShares,
@@ -45,7 +54,8 @@ export function splitStock(state, action) {
 	const splitRatio = action.payload[symbol].splitRatio
 	const price = action.payload[symbol].price
 	const currentShares = state[symbol].shares
-	return {...state,
+	return {
+		...state,
 		[symbol]: {
 			date: action.payload[symbol].date,
 			shares: currentShares * splitRatio,

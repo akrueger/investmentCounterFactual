@@ -6,6 +6,7 @@ import {getPrice} from './lastPriceCache'
 export default function calculateValues(date, quotes, hypoSymbol) {
 	const currentRealSymbols = Object.keys(store.getState().realSecurities)
 	store.dispatch(actionCreators.calculateRealWorth({
+		// calculateRealValue is passing all real symbols instead of active ones
 		worth: parseInt(calculateRealValue(date, quotes, currentRealSymbols).toFixed(0), 10)
 	}))
 	store.dispatch(actionCreators.calculateHypoWorth({
@@ -20,7 +21,12 @@ function calculateRealValue(date, quotes, currentRealSymbols) {
 		if(quoteMatch) {
 			return shares * quoteMatch.close
 		}
-		return shares * getPrice(element)
+		try {
+			return shares * getPrice(element)
+		}
+		catch(error) {
+			return error
+		}
 	})
 	.reduce((previous, current) =>
 		previous + current

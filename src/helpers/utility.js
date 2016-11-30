@@ -125,20 +125,25 @@ function isWeekend(date) {
 }
 
 export function binarySearch(array, element) {
-	let low = 0
-	let high = array.length - 1
-	while(low <= high) {
-		const mid = Math.floor((low + high) / 2)
-		const guess = formatDate(array[mid].date)
-		if(guess === element) {
-			return array[mid]
+	try {
+		let low = 0
+		let high = array.length - 1
+		while(low <= high) {
+			const mid = Math.floor((low + high) / 2)
+			const guess = formatDate(array[mid].date)
+			if(guess === element) {
+				return array[mid]
+			}
+			if(guess > element) {
+				high = mid - 1
+			}
+			else {
+				low = mid + 1
+			}
 		}
-		if(guess > element) {
-			high = mid - 1
-		}
-		else {
-			low = mid + 1
-		}
+		return undefined
 	}
-	return undefined
+	catch(error) {
+		return error
+	}
 }
