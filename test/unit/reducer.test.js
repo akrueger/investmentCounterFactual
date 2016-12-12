@@ -1,6 +1,6 @@
 import test from 'ava'
-import * as reducers from '../src/reducers'
-import * as actionTypes from '../src/actionTypes'
+import * as reducers from '../../src/reducers'
+import * as actionTypes from '../../src/actionTypes'
 
 test('empty action', t => {
 	const expectedState = {}

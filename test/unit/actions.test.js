@@ -1,6 +1,6 @@
 import test from 'ava'
-import * as actionCreators from '../src/actionCreators'
-import * as actionTypes from '../src/actionTypes'
+import * as actionCreators from '../../src/actionCreators'
+import * as actionTypes from '../../src/actionTypes'
 
 /*
 When testing action creators we want to test whether the correct action
